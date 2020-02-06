@@ -1,0 +1,11 @@
+[package]
+name = "api"
+version = "0.1.0"
+authors = ["Florian Warzecha <liketechnik@disroot.org>"]
+edition = "2018"
+
+[dependencies]
+gotham = "0.4.0"
+
+shared = { path = "../shared" }
+

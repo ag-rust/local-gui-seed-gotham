@@ -1,0 +1,9 @@
+# rust compilation results
+**/target
+gui/pkg/**
+
+# cargo dependencie lock file
+**/Cargo.lock
+
+# idea files
+.idea

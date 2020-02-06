@@ -1,0 +1,54 @@
+
+# ---- BUILD ----
+
+[tasks.build]
+description = "Build gui and api"
+clear = true
+workspace = false
+dependencies = ["build_gui", "build_api"]
+
+[tasks.build_release]
+extend = "build"
+description = "Build gui and api in release mode"
+dependencies = ["build_gui_release", "build_server_release"]
+
+[tasks.build_gui]
+description = "Build gui"
+workspace = false
+install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "-V" }
+command = "wasm-pack"
+args = ["build", "gui", "--target", "web", "--out-name", "gui", "--dev"]
+
+[tasks.build_gui_release]
+extend = "build_gui"
+description = "Build gui in release mode"
+args = ["build", "gui", "--target", "web", "--out-name", "gui", "--release"]
+
+[tasks.build_api]
+description = "Build api"
+workspace = false
+command = "cargo"
+args = ["build", "--package", "api"]
+
+[tasks.build_api_release]
+extend = "build_api"
+description = "Build api in release mode"
+args = ["build", "--package", "api", "--relase"]
+
+# ---- START ----
+
+[tasks.start]
+description = "Build and start the api server on port 8080"
+workspace = false
+command = "cargo"
+args = ["run", "--package", "api"]
+dependencies = ["build"]
+
+[tasks.start_release]
+extend = "start"
+description = "Build and start the api server on port 8080"
+args = ["run", "--package", "server", "--release"]
+dependencies = ["build_release"]
+
+# ---- LINT ----
+# TODO

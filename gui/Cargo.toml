@@ -1,0 +1,27 @@
+[package]
+name = "gui"
+version = "0.1.0"
+authors = ["Florian Warzecha <liketechnik@disroot.org>"]
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+seed = "0.6.0"
+serde = "1.0.104"
+wasm-bindgen = "0.2.58"
+
+shared = { path = "../shared" }
+
+[dependencies.web-sys]
+version = "0.3.35"
+features = [
+    "Blob",
+    "Event",
+    "EventTarget",
+    "File",
+    "FileList",
+    "FormData",
+    "HtmlInputElement",
+]
