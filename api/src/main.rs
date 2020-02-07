@@ -6,6 +6,7 @@ pub fn main() {
 
     let router = build_simple_router(|route| {
         route.get("gui/pkg/*").to_dir(FileOptions::new("./gui/pkg"));
+        route.get("gui/wing.min.css").to_file(FileOptions::new("./gui/wing.min.css"));
         route.get("/").to_file(FileOptions::new("./gui/index.html"));
     });
 

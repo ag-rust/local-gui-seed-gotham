@@ -62,6 +62,11 @@ The workspace root contains a `Makefile.toml` which adds the `build` and `start`
 The `start` tasks builds everything and then starts the `api` binary that contains the server with the 
 rest api implementation and the statically served gui. 
 
+### CSS styling
+
+The minified version of [Wing](https://kbrsh.github.io/wing) is loaded in the `index.html` and 
+included in the repository.
+
 ## Helpful resources
 The code (especially the `gui` implementation) is to a large extent just adopted from the examples in 
 the libraries repositories.
