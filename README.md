@@ -19,6 +19,7 @@ the usual sandboxing of code inside the browser doesn't affect the server.
     * [Workspace organisation](#workspace-organisation)
     * [Building and serving](#building-and-serving)
 * [Helpful resources](#helpful-resources)
+* [Contribution](#contribution)
 
 ## Required dependencies 
 All required libraries are declared in the respective `Cargo.toml` file.
@@ -73,6 +74,20 @@ the libraries repositories.
 Additionally, the documentation for both libraries is really helpful, so go take a look at it too. 
 (And a big thank you to both libraries contributors for both the libraries itself and the amazing 
 documentation, that isn't always in such a good condition.)
+
+## Contribution
+Some choices in this template are (very) opinionated, like for example the frameworks in use.
+Although I want this to be a template for the rust community as a whole, 
+it's sometimes difficult to please everyones  expectations and choices in software('s) design. 
+Therefore I happily invite everyone to participate in the further development of this 
+template repository, but also remind everyone that sometimes ideas just don't fit together
+and we should respect that. 
+
+Both the issue tracker and the merge requests are a great way to improve the repository.
+For the reason mentioned above I'd prefer to talk about new ideas in issues first
+and start merge requests only after discussion took place in an issue.
+(Mainly to prevent somebody putting work into something they like only for it to
+be discarded because there's disagreement if it really fits into this template.) 
 
 ## License
 MIT License
