@@ -6,7 +6,7 @@ extern crate mime;
 use hyper::{Body, Response, StatusCode};
 use gotham::handler::assets::FileOptions;
 use gotham::router::builder::{DefineSingleRoute, DrawRoutes, build_router};
-use shared::{Counter, Error};
+use shared::{Counter};
 use std::sync::{Mutex, Arc};
 use gotham::state::{State, FromState};
 use gotham::helpers::http::response::create_response;
@@ -14,6 +14,21 @@ use gotham_derive::StateData;
 use gotham::middleware::state::StateMiddleware;
 use gotham::pipeline::single_middleware;
 use gotham::pipeline::single::single_pipeline;
+use gotham::handler::IntoResponse;
+use shared::Error as SError;
+
+struct Error(SError);
+
+impl Error {
+    fn into_response(self, state: &State, status_code: StatusCode) -> Response<Body> {
+        create_response(
+            &state,
+            status_code,
+            mime::APPLICATION_JSON,
+            serde_json::to_string(&self.0.reason).expect("Failed to serialize error message."),
+        )
+    }
+}
 
 #[derive(Clone, StateData)]
 struct CounterState {
@@ -37,10 +52,10 @@ impl CounterState {
                     counter.count += 1;
                     Ok(counter.count)
                 } else {
-                    Err(Error { reason: String::from("Reached maximum value.") })
+                    Err(Error(SError { reason: String::from("Reached maximum value.") }))
                 }
             },
-            None => Err(Error { reason: String::from("Counter has not been initialized") }),
+            None => Err(Error(SError { reason: String::from("Counter has not been initialized") })),
         }
     }
 
@@ -52,10 +67,10 @@ impl CounterState {
                     counter.count -= 1;
                     Ok(counter.count)
                 } else {
-                    Err(Error { reason: String::from("Reached minimum value.") })
+                    Err(Error(SError { reason: String::from("Reached minimum value.") }))
                 }
             },
-            None => Err(Error { reason: String::from("Counter has not been initialized") }),
+            None => Err(Error(SError { reason: String::from("Counter has not been initialized") })),
         }
     }
 
@@ -73,6 +88,37 @@ impl CounterState {
     }
 }
 
+impl IntoResponse for CounterState {
+    fn into_response(self, state: &State) -> Response<Body> {
+        let mut counter = self.inner.lock().unwrap();
+        match counter.as_ref() {
+            Some(counter) => {
+                let counter_ser = serde_json::to_string(counter);
+                match counter_ser {
+                    Ok(body) => {
+                        create_response(
+                            &state,
+                            StatusCode::OK,
+                            mime::APPLICATION_JSON,
+                            body
+                        )
+                    },
+                    Err(_) => serialization_error_response(&state),
+                }
+            },
+            None => {
+                Error(SError { reason: String::from("Counter is not initialized!" ) })
+                    .into_response(&state, StatusCode::CONFLICT)
+            }
+        }
+    }
+}
+
+fn serialization_error_response(state: &State) -> Response<Body> {
+    Error(SError { reason: String::from("Failed to serialize struct!") } )
+        .into_response(state, StatusCode::INTERNAL_SERVER_ERROR)
+}
+
 fn post_counter_increment(state: State) -> (State, Response<Body>) {
     post_counter(state, CounterState::increment)
 }
@@ -87,22 +133,8 @@ fn post_counter<F>(state: State, count: F) -> (State, Response<Body>)
     let response = {
         let counter = CounterState::borrow_from(&state);
         match count(counter) {
-            Ok(_) => {
-                create_response(
-                    &state,
-                    StatusCode::OK,
-                    mime::APPLICATION_JSON,
-                    serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
-                )
-            },
-            Err(e) => {
-                create_response(
-                    &state,
-                    StatusCode::CONFLICT,
-                    mime::APPLICATION_JSON,
-                    serde_json::to_string(&e).expect("serialized error"),
-                )
-            }
+            Ok(_) => counter.into_response(&state),
+            Err(e) => e.into_response(&state, StatusCode::CONFLICT),
         }
     };
     (state, response)
@@ -111,21 +143,7 @@ fn post_counter<F>(state: State, count: F) -> (State, Response<Body>)
 fn get_counter(state: State) -> (State, Response<Body>) {
     let response = {
         let counter = CounterState::borrow_from(&state);
-        if counter.initialized() {
-            create_response(
-                &state,
-                StatusCode::OK,
-                mime::APPLICATION_JSON,
-                serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
-            )
-        } else {
-            create_response(
-                &state,
-                StatusCode::CONFLICT,
-                mime::APPLICATION_JSON,
-                serde_json::to_string(&Error { reason: String::from("Counter has not been initialized") } ).expect("serialized error"),
-            )
-        }
+        counter.into_response(&state)
     };
     (state, response)
 }
@@ -134,20 +152,11 @@ fn post_counter_init(state: State) -> (State, Response<Body>) {
     let response = {
         let counter = CounterState::borrow_from(&state);
         if counter.initialized() {
-            create_response(
-                &state,
-                StatusCode::CONFLICT,
-                mime::APPLICATION_JSON,
-                serde_json::to_string(&Error { reason: String::from("Counter already initialized.") }).expect("serialized error"),
-            )
+            Error( SError {reason: String::from("Counter already initialized.") })
+                .into_response(&state, StatusCode::CONFLICT)
         } else {
             counter.set_default();
-            create_response(
-                &state,
-                StatusCode::OK,
-                mime::APPLICATION_JSON,
-                serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
-            )
+            counter.into_response()
         }
     };
     (state, response)
