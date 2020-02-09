@@ -18,8 +18,14 @@ the usual sandboxing of code inside the browser doesn't affect the server.
 * [Details](#details)
     * [Workspace organisation](#workspace-organisation)
     * [Building and serving](#building-and-serving)
+    * [CSS Styling](#css-styling)
+* [Current State](#current-state)
+    * [Pros](#pros)
+    * [Cons / Problems](#cons--problems)
+    * [Roadmap](#roadmap)
 * [Helpful resources](#helpful-resources)
 * [Contribution](#contribution)
+* [License](#license)
 
 ## Required dependencies 
 All required libraries are declared in the respective `Cargo.toml` file.
@@ -68,6 +74,60 @@ rest api implementation and the statically served gui.
 The minified version of [Wing](https://kbrsh.github.io/wing) is loaded in the `index.html` and 
 included in the repository.
 
+## Current state
+Why you may want to use the approach of this template, why you may not want to (exactly) follow
+the approach of this template. And of course what is planned for the future of the template.
+
+### Pros
+Why you may want to use this template. The expected use cases for this template 
+(feel free to add more if you've found this useful in a different case too).
+
+* in browser GUI with access to local file system: usually the sandbox of the browser 
+prevents access to the local file system. The gui/api architecture bypasses this.
+* rendering of markdown or math formula via rust or JavaScript 
+* clear separation of gui and logic due to having two separate binaries
+* easier testing of the logic, because the api is fully testable without the gui crate
+
+### Cons / Problems
+Why you may not want to use this template. Use cases this was not designed for 
+(may change in the future) and (current) limitations.  
+
+* ~no easy way of distributing binaries of the program: There are multiple binaries to distribute
+and the `.html` and `.css` files for loading the gui need to be distributed. 
+Currently you need to download the repository to start the program.
+* !The user has to manually open a browser window and point it to the server: 
+This could be solved by just starting a browser and passing it the server url before starting
+the server.
+* No concurrency handling: If a user opens the gui in multiple browser tabs 
+the gui state won't be synchronized, the server also doesn't expect this to happen. 
+Because this isn't a concern for traditional GUIs too, this will always be the case.
+But one could add a note in the gui.
+* No authentication: The server is bound to a local port that is not reachable
+from outside of the computer the program was started on. This is expected to always be the case.
+Also not a concern for traditional GUIs, so out of scope here.
+
+(`~`: part of the long therm roadmap; `!`: part of the short term roadmap)
+
+### Roadmap
+What is currently missing functionality to be showcased? What problems/limitations are solvable in
+the (near) future?
+
+Short term:
+* [ ] Move counter logic to server, integrate api.
+* [ ] Add shutdown logic that lets the server terminate itself 
+when the user exits the gui in the browser (e. g. closes the tab).
+* [ ] Open firefox (if available) and point it to the server's url on startup.
+* [ ] Save and load the counter to show how to use files.
+* [ ] Together with above: Add a navigation bar with different content, e. g. state handling.
+(Similar to what maybe would be different windows in traditional GUIs)
+
+Long term:
+* [ ] Create a third crate that uses webkit (or something with webkit like functionality) 
+that starts the server and loads the webpage gui. (Would solve both current problems)
+* [ ] Integrate a configuration framework to showcase/template configuration options.
+* [ ] Find a way for bundling/creating packages/releases.
+* [ ] Try to integrate templating and/or internationalization into this.
+
 ## Helpful resources
 The code (especially the `gui` implementation) is to a large extent just adopted from the examples in 
 the libraries repositories.
@@ -78,10 +138,10 @@ documentation, that isn't always in such a good condition.)
 ## Contribution
 Some choices in this template are (very) opinionated, like for example the frameworks in use.
 Although I want this to be a template for the rust community as a whole, 
-it's sometimes difficult to please everyones  expectations and choices in software('s) design. 
+it's sometimes difficult to please everyones expectations and choices in software('s) design. 
 Therefore I happily invite everyone to participate in the further development of this 
 template repository, but also remind everyone that sometimes ideas just don't fit together
-and we should respect that. 
+and that we should respect that. 
 
 Both the issue tracker and the merge requests are a great way to improve the repository.
 For the reason mentioned above I'd prefer to talk about new ideas in issues first
