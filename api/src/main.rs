@@ -6,7 +6,7 @@ extern crate mime;
 use hyper::{Body, Response, StatusCode};
 use gotham::handler::assets::FileOptions;
 use gotham::router::builder::{DefineSingleRoute, DrawRoutes, build_router};
-use shared::Counter;
+use shared::{Counter, Error};
 use std::sync::{Mutex, Arc};
 use gotham::state::{State, FromState};
 use gotham::helpers::http::response::create_response;
@@ -29,16 +29,24 @@ impl Default for CounterState {
 }
 
 impl CounterState {
-    fn increment(&self) -> i32 {
+    fn increment(&self) -> Result<i32, Error> {
         let mut count = self.inner.lock().unwrap();
-        count.count += 1;
-        count.count
+        if count.count < i32::max_value() {
+            count.count += 1;
+            Ok(count.count)
+        } else {
+            Err(Error { reason: String::from("Reached maximum value.") })
+        }
     }
 
-    fn decrement(&self) -> i32 {
+    fn decrement(&self) -> Result<i32, Error> {
         let mut count = self.inner.lock().unwrap();
-        count.count -= 1;
-        count.count
+        if count.count > i32::min_value() {
+            count.count -= 1;
+            Ok(count.count)
+        } else {
+            Err(Error { reason: String::from("Reached minimum value.") })
+        }
     }
 }
 
@@ -50,18 +58,29 @@ fn post_counter_decrement(state: State) -> (State, Response<Body>) {
     post_counter(state, CounterState::decrement)
 }
 
-fn post_counter<F>(state: State, test: F) -> (State, Response<Body>)
-    where F: Fn(&CounterState) -> i32
+fn post_counter<F>(state: State, count: F) -> (State, Response<Body>)
+    where F: Fn(&CounterState) -> Result<i32, Error>
 {
     let response = {
         let counter = CounterState::borrow_from(&state);
-        test(counter);
-        create_response(
-            &state,
-            StatusCode::OK,
-            mime::APPLICATION_JSON,
-            serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
-        )
+        match count(counter) {
+            Ok(_) => {
+                create_response(
+                    &state,
+                    StatusCode::OK,
+                    mime::APPLICATION_JSON,
+                    serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
+                )
+            },
+            Err(e) => {
+                create_response(
+                    &state,
+                    StatusCode::CONFLICT,
+                    mime::APPLICATION_JSON,
+                    serde_json::to_string(&e).expect("serialized error"),
+                )
+            }
+        }
     };
     (state, response)
 }

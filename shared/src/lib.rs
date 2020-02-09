@@ -12,3 +12,8 @@ impl Default for Counter {
         Self { count: 0 }
     }
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct Error {
+   pub reason: String,
+}
