@@ -58,6 +58,20 @@ impl CounterState {
             None => Err(Error { reason: String::from("Counter has not been initialized") }),
         }
     }
+
+    fn set_default(&self) -> () {
+        let mut counter = self.inner.lock().unwrap();
+        *counter = Some(Counter::default());
+    }
+
+    fn initialized(&self) -> bool {
+        let counter = self.inner.lock().unwrap();
+        match counter.as_ref() {
+            Some(_) => true,
+            None => false,
+        }
+    }
+
 }
 
 fn post_counter_increment(state: State) -> (State, Response<Body>) {
@@ -95,6 +109,42 @@ fn post_counter<F>(state: State, count: F) -> (State, Response<Body>)
     (state, response)
 }
 
+fn get_counter(state: State) -> (State, Response<Body>) {
+    let response = {
+        let counter = CounterState::borrow_from(&state);
+        create_response(
+            &state,
+            StatusCode::OK,
+            mime::APPLICATION_JSON,
+            serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
+        )
+    };
+    (state, response)
+}
+
+fn post_counter_init(state: State) -> (State, Response<Body>) {
+    let response = {
+        let counter = CounterState::borrow_from(&state);
+        if counter.initialized() {
+            create_response(
+                &state,
+                StatusCode::CONFLICT,
+                mime::APPLICATION_JSON,
+                serde_json::to_string(&Error { reason: String::from("Counter already initialized.") }).expect("serialized error"),
+            )
+        } else {
+            counter.set_default();
+            create_response(
+                &state,
+                StatusCode::OK,
+                mime::APPLICATION_JSON,
+                serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
+            )
+        }
+    };
+    (state, response)
+}
+
 
 pub fn main() {
     let addr = "127.0.0.1:8080";
@@ -106,6 +156,8 @@ pub fn main() {
 
 
     let router = build_router(chain, pipelines, |route| {
+        route.get("/counter").to(get_counter);
+        route.post("/counter/init").to(post_counter_init);
         route.post("/counter/increment").to(post_counter_increment);
         route.post("/counter/decrement").to(post_counter_decrement);
         route.get("/gui/pkg/*").to_dir(FileOptions::new("./gui/pkg"));
