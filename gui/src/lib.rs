@@ -23,8 +23,8 @@ enum Msg {
 
 fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::Increment => model.counter += 1,
-        Msg::Decrement => model.counter -= 1,
+        Msg::Increment => model.counter.count += 1,
+        Msg::Decrement => model.counter.count -= 1,
     };
 }
 
@@ -37,7 +37,7 @@ fn view(model: &Model) -> impl View<Msg> {
         ],
         div![ attrs!{At::Class => "row"},
             div![ attrs!{At::Class => "card"; At::Class => "col" },
-                    h3![ attrs![At::Class => "card-header" ], format!("Current count is {}", model.counter.get_count()) ],
+                    h3![ attrs![At::Class => "card-header" ], format!("Current count is {}", model.counter.count) ],
                     p![ attrs![At::Class => "card-body" ],
                         button![ simple_ev(Ev::Click, Msg::Increment), "+" ],
                         button![ simple_ev(Ev::Click, Msg::Decrement), "-" ],

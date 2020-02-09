@@ -4,6 +4,8 @@ This is a template repository for creating locally running client-side/wasm in b
     > A Rust framework for creating web apps 
 * [gotham](https://gotham.rs)
     > A flexible web framework that does not sacrifice safety, security or speed.
+                                
+in rust.
 
 It displays a simple counter and two buttons to increment/decrement the counter.
 Communication works via a REST api.
