@@ -71,7 +71,6 @@ impl CounterState {
             None => false,
         }
     }
-
 }
 
 fn post_counter_increment(state: State) -> (State, Response<Body>) {
@@ -112,12 +111,21 @@ fn post_counter<F>(state: State, count: F) -> (State, Response<Body>)
 fn get_counter(state: State) -> (State, Response<Body>) {
     let response = {
         let counter = CounterState::borrow_from(&state);
-        create_response(
-            &state,
-            StatusCode::OK,
-            mime::APPLICATION_JSON,
-            serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
-        )
+        if counter.initialized() {
+            create_response(
+                &state,
+                StatusCode::OK,
+                mime::APPLICATION_JSON,
+                serde_json::to_string(counter.inner.as_ref()).expect("serialized counter"),
+            )
+        } else {
+            create_response(
+                &state,
+                StatusCode::CONFLICT,
+                mime::APPLICATION_JSON,
+                serde_json::to_string(&Error { reason: String::from("Counter has not been initialized") } ).expect("serialized error"),
+            )
+        }
     };
     (state, response)
 }
