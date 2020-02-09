@@ -1,4 +1,8 @@
+extern crate serde;
 
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
 pub struct Counter {
     pub count: i32,
 }
