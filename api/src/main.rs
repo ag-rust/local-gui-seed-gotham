@@ -17,13 +17,13 @@ use gotham::pipeline::single::single_pipeline;
 
 #[derive(Clone, StateData)]
 struct CounterState {
-    inner: Arc<Mutex<Counter>>,
+    inner: Arc<Mutex<Option<Counter>>>,
 }
 
 impl Default for CounterState {
     fn default() -> Self {
         Self {
-            inner: Arc::new(Mutex::new(Counter::default())),
+            inner: Arc::new(Mutex::new(None)),
         }
     }
 }
@@ -31,21 +31,31 @@ impl Default for CounterState {
 impl CounterState {
     fn increment(&self) -> Result<i32, Error> {
         let mut count = self.inner.lock().unwrap();
-        if count.count < i32::max_value() {
-            count.count += 1;
-            Ok(count.count)
-        } else {
-            Err(Error { reason: String::from("Reached maximum value.") })
+        match count.as_mut() {
+            Some(counter) => {
+                if counter.count < i32::max_value() {
+                    counter.count += 1;
+                    Ok(counter.count)
+                } else {
+                    Err(Error { reason: String::from("Reached maximum value.") })
+                }
+            },
+            None => Err(Error { reason: String::from("Counter has not been initialized") }),
         }
     }
 
     fn decrement(&self) -> Result<i32, Error> {
         let mut count = self.inner.lock().unwrap();
-        if count.count > i32::min_value() {
-            count.count -= 1;
-            Ok(count.count)
-        } else {
-            Err(Error { reason: String::from("Reached minimum value.") })
+        match count.as_mut() {
+            Some(counter) => {
+                if counter.count > i32::min_value() {
+                    counter.count -= 1;
+                    Ok(counter.count)
+                } else {
+                    Err(Error { reason: String::from("Reached minimum value.") })
+                }
+            },
+            None => Err(Error { reason: String::from("Counter has not been initialized") }),
         }
     }
 }
