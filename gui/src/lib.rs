@@ -1,7 +1,7 @@
 extern crate seed;
 extern crate shared;
 
-use seed::{*, prelude::*};
+use seed::{prelude::*, *};
 
 use shared::Counter;
 
@@ -11,14 +11,16 @@ struct Model {
 
 impl Default for Model {
     fn default() -> Self {
-        Self{counter: Counter::default()}
+        Self {
+            counter: Counter::default(),
+        }
     }
 }
 
 #[derive(Clone)]
 enum Msg {
     Increment,
-    Decrement
+    Decrement,
 }
 
 fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
@@ -30,18 +32,26 @@ fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 
 fn view(model: &Model) -> impl View<Msg> {
     div![
-        div![ attrs!{At::Class => "row"},
-            div![ attrs!{At::Class => "col"; At::Class => "center"; },
-                h1![ "Let's count" ],
+        div![
+            attrs! {At::Class => "row"},
+            div![
+                attrs! {At::Class => "col"; At::Class => "center"; },
+                h1!["Let's count"],
             ],
         ],
-        div![ attrs!{At::Class => "row"},
-            div![ attrs!{At::Class => "card"; At::Class => "col" },
-                    h3![ attrs![At::Class => "card-header" ], format!("Current count is {}", model.counter.count) ],
-                    p![ attrs![At::Class => "card-body" ],
-                        button![ simple_ev(Ev::Click, Msg::Increment), "+" ],
-                        button![ simple_ev(Ev::Click, Msg::Decrement), "-" ],
-                    ],
+        div![
+            attrs! {At::Class => "row"},
+            div![
+                attrs! {At::Class => "card"; At::Class => "col" },
+                h3![
+                    attrs![At::Class => "card-header" ],
+                    format!("Current count is {}", model.counter.count)
+                ],
+                p![
+                    attrs![At::Class => "card-body" ],
+                    button![simple_ev(Ev::Click, Msg::Increment), "+"],
+                    button![simple_ev(Ev::Click, Msg::Decrement), "-"],
+                ],
             ],
         ],
     ]
@@ -49,6 +59,5 @@ fn view(model: &Model) -> impl View<Msg> {
 
 #[wasm_bindgen(start)]
 pub fn render() {
-    App::builder(update, view)
-        .build_and_start();
+    App::builder(update, view).build_and_start();
 }
