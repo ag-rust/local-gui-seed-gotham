@@ -4,5 +4,3 @@ members = [
     "gui",
     "api",
 ]
-
-edition = "2018"
