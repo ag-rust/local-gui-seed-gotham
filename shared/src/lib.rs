@@ -1,8 +1,8 @@
 extern crate serde;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Counter {
     pub count: i32,
 }
@@ -15,5 +15,5 @@ impl Default for Counter {
 
 #[derive(Serialize, Deserialize)]
 pub struct Error {
-   pub reason: String,
+    pub reason: String,
 }

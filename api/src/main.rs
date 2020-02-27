@@ -26,15 +26,19 @@ pub fn main() {
     let (chain, pipelines) = single_pipeline(pipeline);
 
     let router = build_router(chain, pipelines, |route| {
-        route.get("/counter").to(get_counter);
-        route.post("/counter/init").to(post_counter_init);
-        route.post("/counter/increment").to(post_counter_increment);
-        route.post("/counter/decrement").to(post_counter_decrement);
+        route.get("api/v1/counter").to(get_counter);
+        route.post("api/v1/counter/init").to(post_counter_init);
         route
-            .get("/gui/pkg/*")
+            .post("api/v1/counter/increment")
+            .to(post_counter_increment);
+        route
+            .post("api/v1/counter/decrement")
+            .to(post_counter_decrement);
+        route
+            .get("/gui/v1/pkg/*")
             .to_dir(FileOptions::new("./gui/pkg"));
         route
-            .get("/gui/wing.min.css")
+            .get("/gui/v1/wing.min.css")
             .to_file(FileOptions::new("./gui/wing.min.css"));
         route.get("/").to_file(FileOptions::new("./gui/index.html"));
     });
