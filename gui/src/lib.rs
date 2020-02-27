@@ -6,9 +6,10 @@ use seed::{prelude::*, *};
 
 use shared::Counter;
 
-const API_URL: &str = "http://localhost:8080/api/v1";
 const COUNTER_FETCH_URL: &str = "http://localhost:8080/api/v1/counter";
 const COUNTER_INIT_URL: &str = "http://localhost:8080/api/v1/counter/init";
+const COUNTER_INCREMENT_URL: &str = "http://localhost:8080/api/v1/counter/increment";
+const COUNTER_DECREMENT_URL: &str = "http://localhost:8080/api/v1/counter/decrement";
 
 struct Model {
     counter: Counter,
@@ -42,8 +43,13 @@ enum Msg {
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::Increment => model.counter.count += 1,
-        Msg::Decrement => model.counter.count -= 1,
+        Msg::Increment => {
+            orders.skip().perform_cmd(increment_counter());
+        }
+
+        Msg::Decrement => {
+            orders.skip().perform_cmd(decrement_counter());
+        }
 
         Msg::CounterFetched(Ok(counter)) => model.counter = counter,
 
@@ -70,6 +76,21 @@ async fn init_counter() -> Result<Msg, Msg> {
         .await
 }
 
+async fn modify_counter(endpoint: &'static str) -> Result<Msg, Msg> {
+    Request::new(endpoint)
+        .method(Method::Post)
+        .fetch_json_data(Msg::CounterFetched)
+        .await
+}
+
+async fn decrement_counter() -> Result<Msg, Msg> {
+    modify_counter(COUNTER_DECREMENT_URL).await
+}
+
+async fn increment_counter() -> Result<Msg, Msg> {
+    modify_counter(COUNTER_INCREMENT_URL).await
+}
+
 // ------ -----
 //     View
 // ------ -----
@@ -93,8 +114,8 @@ fn view(model: &Model) -> impl View<Msg> {
                 ],
                 p![
                     attrs![At::Class => "card-body" ],
-                    //button![simple_ev(Ev::Click, Msg::Increment), "+"],
-                    //button![simple_ev(Ev::Click, Msg::Decrement), "-"],
+                    button![ev(Ev::Click, |_| Msg::Increment), "+"],
+                    button![ev(Ev::Click, |_| Msg::Decrement), "-"],
                 ],
             ],
         ],
