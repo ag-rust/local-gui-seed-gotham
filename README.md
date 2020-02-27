@@ -115,7 +115,7 @@ What is currently missing functionality to be showcased? What problems/limitatio
 the (near) future?
 
 Short term:
-* [ ] Move counter logic to server, integrate api.
+* [x] Move counter logic to server, integrate api.
 * [ ] Add shutdown logic that lets the server terminate itself 
 when the user exits the gui in the browser (e. g. closes the tab).
 * [ ] Open firefox (if available) and point it to the server's url on startup.
