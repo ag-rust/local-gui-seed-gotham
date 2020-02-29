@@ -10,6 +10,7 @@ const COUNTER_FETCH_URL: &str = "http://localhost:8080/api/v1/counter";
 const COUNTER_INIT_URL: &str = "http://localhost:8080/api/v1/counter/init";
 const COUNTER_INCREMENT_URL: &str = "http://localhost:8080/api/v1/counter/increment";
 const COUNTER_DECREMENT_URL: &str = "http://localhost:8080/api/v1/counter/decrement";
+const BACKEND_TERMINATION_URL: &str = "http://localhost:8080/api/v1/terminate";
 
 struct Model {
     counter: Counter,
@@ -22,6 +23,15 @@ impl Default for Model {
         }
     }
 }
+
+// ---- -----
+//  Window Events
+// ---- -----
+
+fn window_events(_model: &Model) -> Vec<EventHandler<Msg>> {
+    vec![ev(Ev::BeforeUnload, Msg::OnClose)]
+}
+
 // ----- -----
 // After Mount (Initialization)
 // ----- -----
@@ -39,6 +49,8 @@ enum Msg {
     Increment,
     Decrement,
     CounterFetched(fetch::ResponseDataResult<Counter>),
+    OnClose(web_sys::Event),
+    BackendTerminated(fetch::ResponseDataResult<String>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -60,7 +72,21 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             ));
             orders.skip();
         }
+
+        Msg::OnClose(_event) => {
+            log!("closing");
+            orders.skip().perform_cmd(terminate_backend());
+        }
+
+        Msg::BackendTerminated(_) => {} // no need to handle it, the application is closed here
     };
+}
+
+async fn terminate_backend() -> Result<Msg, Msg> {
+    Request::new(BACKEND_TERMINATION_URL)
+        .method(Method::Post)
+        .fetch_json_data(Msg::BackendTerminated)
+        .await
 }
 
 async fn fetch_counter() -> Result<Msg, Msg> {
@@ -130,5 +156,6 @@ fn view(model: &Model) -> impl View<Msg> {
 pub fn render() {
     App::builder(update, view)
         .after_mount(after_mount)
+        .window_events(window_events)
         .build_and_start();
 }
