@@ -32,17 +32,18 @@ impl CounterState {
     {
         if self.initialized() {
             let mut count = self.inner.lock().unwrap();
-            return match arith(count.as_ref().unwrap().count, 1) {
+            match arith(count.as_ref().unwrap().count, 1) {
                 Some(result) => {
                     count.as_mut().unwrap().count = result;
                     Ok(result)
                 }
                 None => Err(Error::new(error)),
-            };
-        };
-        Err(Error::new(String::from(
-            "Counter has not been initialized.",
-        )))
+            }
+        } else {
+            Err(Error::new(String::from(
+                "Counter has not been initialized.",
+            )))
+        }
     }
 
     pub(crate) fn increment(&self) -> Result<i32, Error> {
