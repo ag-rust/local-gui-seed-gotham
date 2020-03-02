@@ -1,3 +1,4 @@
+pub mod assets;
 pub mod counter;
 
 use gotham::state::State;

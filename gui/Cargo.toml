@@ -25,4 +25,6 @@ features = [
     "FileList",
     "FormData",
     "HtmlInputElement",
+    "CloseEvent",
+    "BeforeUnloadEvent",
 ]

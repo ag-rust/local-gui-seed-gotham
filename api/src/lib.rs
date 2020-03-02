@@ -2,6 +2,8 @@ extern crate gotham;
 extern crate gotham_derive;
 extern crate hyper;
 extern crate mime;
+extern crate rust_embed;
+extern crate serde;
 
 mod api;
 mod data;
@@ -9,6 +11,7 @@ mod data;
 use data::counter::CounterState;
 
 use crate::api::{
+    assets::{get_asset, PathExtractor},
     counter::{get_counter, post_counter_decrement, post_counter_increment, post_counter_init},
     terminate,
 };
@@ -36,12 +39,9 @@ pub fn main() {
             .post("api/v1/counter/decrement")
             .to(post_counter_decrement);
         route
-            .get("/gui/v1/pkg/*")
-            .to_dir(FileOptions::new("./gui/pkg"));
-        route
-            .get("/gui/v1/wing.min.css")
-            .to_file(FileOptions::new("./gui/wing.min.css"));
-        route.get("/").to_file(FileOptions::new("./gui/index.html"));
+            .get("api/v1/assets/*")
+            .with_path_extractor::<PathExtractor>()
+            .to(get_asset);
     });
 
     gotham::start(addr, router)

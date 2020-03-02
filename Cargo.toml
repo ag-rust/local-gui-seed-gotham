@@ -3,4 +3,5 @@
 members = [
     "gui",
     "api",
+    "app",
 ]

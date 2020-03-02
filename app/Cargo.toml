@@ -1,0 +1,12 @@
+[package]
+name = "app"
+version = "0.1.0"
+authors = ["Florian Warzecha <liketechnik@disroot.org>"]
+edition = "2018"
+
+[dependencies]
+
+web-view = { version = "0.6.0" }
+
+api = { path = "../api" }
+
