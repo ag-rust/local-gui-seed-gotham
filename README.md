@@ -4,6 +4,10 @@ This is a template repository for creating locally running client-side/wasm in b
     > A Rust framework for creating web apps 
 * [gotham](https://gotham.rs)
     > A flexible web framework that does not sacrifice safety, security or speed.
+* [rust-embed](https://github.com/pyros2097/rust-embed)
+    > Rust Custom Derive Macro which loads files into rust binary at compile time [...].
+* [web-view](https://github.com/Boscop/web-view)
+    > [...] provides a Rust binding to the original implementation of [webview](https://github.com/zserge/webview), a tiny cross-platform library to render web-based GUIs as desktop applications.
                                 
 in rust.
 
@@ -44,31 +48,35 @@ Nevertheless, some tools need to be installed manually:
     ```
     cargo install cargo-make 
     ```
+* On linux, make sure ```Webkit2gtk``` is available (cf. web-view repo):
+    I can't provide specific instructions here, but for compiling, you'll usually need some kind of ```-devel``` package additionally.
   
 ## Quickstart
 Build the app with `cargo make build` (`cargo make build_release`) 
 or start it with `cargo make start` (`cargo make start_release`). 
-Access the app on `localhost:8080` in your browser.
+If you need access to the developer console you can open the gui on port 8080 in your browser.
 
 ## Details
 
 The detailed structure of the app template.
 
 ### Workspace organisation
-The workspace is split in three crates:
+The workspace is split in four crates:
 
 * __api:__ The implementation of the rest api with _gotham_, allowing the client to access local file system resources.
 Serves the `gui` as a wasm binary wrapped in a simple html site.
+For serving assets like the wasm binary or the html, ```rust-embed``` is used.
 Could be named `server` too.
 * __gui:__ The implementation of the gui with _seed_. 
 Accesses the data via the rest api implementation of the `gui`. 
 Could be named `client` too.
 * __shared:__ The data model of the app, e.g. code that is needed both on gui (client) and api (server) side.
+* __app:__ Bundles *api* and *gui* together as one binary. Starts the webview window and the api server.
 
 ### Building and serving
 The workspace root contains a `Makefile.toml` which adds the `build` and `start` tasks to the
 `cargo make`  command. Both have a `_release` sibling that enables the release optimizations.
-The `start` tasks builds everything and then starts the `api` binary that contains the server with the 
+The `start` tasks builds everything and then starts the `app` binary that contains the server with the 
 rest api implementation and the statically served gui. 
 
 ### CSS styling
@@ -87,8 +95,9 @@ Why you may want to use this template. The expected use cases for this template
 * in browser GUI with access to local file system: usually the sandbox of the browser 
 prevents access to the local file system. The gui/api architecture bypasses this.
 * rendering of markdown or math formula via rust or JavaScript 
-* clear separation of gui and logic due to having two separate binaries
+* clear separation of gui and logic due to having two separate binaries -> 
 * easier testing of the logic, because the api is fully testable without the gui crate
+* Size: Although not a really good example, the full size of this app with bundled assets is around 7,5MB (the release, not the debug build). 
 
 ### Cons / Problems
 Why you may not want to use this template. Use cases this was not designed for 
@@ -96,10 +105,10 @@ Why you may not want to use this template. Use cases this was not designed for
 
 * ~~no easy way of distributing binaries of the program: There are multiple binaries to distribute
 and the `.html` and `.css` files for loading the gui need to be distributed. 
-Currently you need to download the repository to start the program.~~ Solved with rust_embed.
+Currently you need to download the repository to start the program.~~ Solved with rust-embed.
 * ~~The user has to manually open a browser window and point it to the server: 
 This could be solved by just starting a browser and passing it the server url before starting
-the server.~~ Solved with webkit.
+the server.~~ Solved with webview.
 * No concurrency handling: If a user opens the gui in multiple browser tabs 
 the gui state won't be synchronized, the server also doesn't expect this to happen. 
 Because this isn't a concern for traditional GUIs too, this will always be the case.
@@ -125,9 +134,9 @@ when the user exits the gui in the browser (e. g. closes the tab).
 
 Long term:
 * [x] Create a third crate that uses webkit (or something with webkit like functionality) 
-that starts the server and loads the webpage gui. (Would solve both current problems)
+that starts the server and loads the webpage gui. (Would solve both current problems). Solved with web-view crate.
 * [ ] Integrate a configuration framework to showcase/template configuration options.
-* [x] Find a way for bundling/creating packages/releases. Handled with rust_embed.
+* [x] Find a way for bundling/creating packages/releases. Handled with rust-embed.
 * [ ] Try to integrate templating and/or internationalization into this.
 
 ## Helpful resources
