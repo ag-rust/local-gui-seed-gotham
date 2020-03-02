@@ -94,12 +94,12 @@ prevents access to the local file system. The gui/api architecture bypasses this
 Why you may not want to use this template. Use cases this was not designed for 
 (may change in the future) and (current) limitations.  
 
-* ~no easy way of distributing binaries of the program: There are multiple binaries to distribute
+* ~~no easy way of distributing binaries of the program: There are multiple binaries to distribute
 and the `.html` and `.css` files for loading the gui need to be distributed. 
-Currently you need to download the repository to start the program.
-* !The user has to manually open a browser window and point it to the server: 
+Currently you need to download the repository to start the program.~~ Solved with rust_embed.
+* ~~The user has to manually open a browser window and point it to the server: 
 This could be solved by just starting a browser and passing it the server url before starting
-the server.
+the server.~~ Solved with webkit.
 * No concurrency handling: If a user opens the gui in multiple browser tabs 
 the gui state won't be synchronized, the server also doesn't expect this to happen. 
 Because this isn't a concern for traditional GUIs too, this will always be the case.
