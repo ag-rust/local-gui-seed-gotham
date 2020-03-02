@@ -10,7 +10,7 @@ fn main() {
     });
 
     web_view::builder()
-        .title("My Project")
+        .title("Local seed+gotham GUI")
         .content(Content::Url(
             "http://localhost:8080/api/v1/assets/index.html",
         ))
