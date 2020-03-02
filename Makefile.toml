@@ -28,7 +28,17 @@ args = ["build", "gui", "--target", "web", "--out-name", "gui", "--release"]
 description = "Copy assets for api"
 workspace = false
 dependencies = ["build_gui"]
-command = "./prepare_assets.sh"
+script_runner = "@duckscript"
+script = [
+'''
+mkdir gui/assets
+
+cp gui/pkg/gui.js gui/assets/gui.js
+cp gui/pkg/gui_bg.wasm gui/assets/gui_bg.wasm
+cp gui/index.html gui/assets/index.html
+cp gui/wing.min.css gui/assets/wing.min.css
+'''
+]
 
 [tasks.prepare_assets_release]
 extend = "prepare_assets"
