@@ -116,18 +116,18 @@ the (near) future?
 
 Short term:
 * [x] Move counter logic to server, integrate api.
-* [ ] Add shutdown logic that lets the server terminate itself 
+* [x] Add shutdown logic that lets the server terminate itself 
 when the user exits the gui in the browser (e. g. closes the tab).
-* [ ] Open firefox (if available) and point it to the server's url on startup.
+* [x] ~~Open firefox (if available) and point it to the server's url on startup.~~ (Replaced by webkit functionality)
 * [ ] Save and load the counter to show how to use files.
 * [ ] Together with above: Add a navigation bar with different content, e. g. state handling.
 (Similar to what maybe would be different windows in traditional GUIs)
 
 Long term:
-* [ ] Create a third crate that uses webkit (or something with webkit like functionality) 
+* [x] Create a third crate that uses webkit (or something with webkit like functionality) 
 that starts the server and loads the webpage gui. (Would solve both current problems)
 * [ ] Integrate a configuration framework to showcase/template configuration options.
-* [ ] Find a way for bundling/creating packages/releases.
+* [x] Find a way for bundling/creating packages/releases. Handled with rust_embed.
 * [ ] Try to integrate templating and/or internationalization into this.
 
 ## Helpful resources
