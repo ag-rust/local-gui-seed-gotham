@@ -2,6 +2,9 @@
 **/target
 gui/pkg/**
 
+# build temporaries
+gui/assets
+
 # cargo dependencie lock file
 **/Cargo.lock
 
