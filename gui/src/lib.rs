@@ -103,7 +103,16 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
 
         Msg::ReadmeFetched(Ok(content)) => {
-            model.readme = content;
+            let mut options = pulldown_cmark::Options::empty();
+            options.insert(pulldown_cmark::Options::ENABLE_TABLES);
+            options.insert(pulldown_cmark::Options::ENABLE_FOOTNOTES);
+            options.insert(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
+            options.insert(pulldown_cmark::Options::ENABLE_TASKLISTS);
+            let parser = pulldown_cmark::Parser::new_ext(&content, options);
+
+            let mut html = String::new();
+            pulldown_cmark::html::push_html(&mut html, parser);
+            model.readme = html;
             orders.skip(); // no need to redraw here, it's not displayed yet
         }
 
@@ -194,7 +203,7 @@ fn view(model: &Model) -> Node<Msg> {
 }
 
 fn view_about(model: &Model) -> Vec<Node<Msg>> {
-    vec![div![attrs! {At::Class => "row",}, md!(&model.readme),]]
+    vec![div![attrs! {At::Class => "col",}, raw!(&model.readme),]]
 }
 
 fn view_counter(model: &Model) -> Vec<Node<Msg>> {
