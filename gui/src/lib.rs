@@ -12,14 +12,21 @@ const COUNTER_INCREMENT_URL: &str = "http://localhost:8080/api/v1/counter/increm
 const COUNTER_DECREMENT_URL: &str = "http://localhost:8080/api/v1/counter/decrement";
 const BACKEND_TERMINATION_URL: &str = "http://localhost:8080/api/v1/terminate";
 
+enum Window {
+    Counter,
+    About,
+}
+
 struct Model {
     counter: Counter,
+    window: Window,
 }
 
 impl Default for Model {
     fn default() -> Self {
         Self {
             counter: Counter::default(),
+            window: Window::Counter,
         }
     }
 }
@@ -41,6 +48,22 @@ fn after_mount(_: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
     AfterMount::default()
 }
 
+/// ----- ------
+/// Routing (Different Windows/Views)
+/// ------ ------
+
+fn routes(url: Url) -> Option<Msg> {
+    if url.path.is_empty() {
+        return Some(Msg::ChangeWindow(Window::Counter));
+    }
+
+    Some(match url.path[0].as_ref() {
+        "counter" => Msg::ChangeWindow(Window::Counter),
+        "about" => Msg::ChangeWindow(Window::About),
+        _ => Msg::ChangeWindow(Window::Counter),
+    })
+}
+
 // ------ -----
 //    Update
 // ----- -----
@@ -49,6 +72,7 @@ enum Msg {
     Increment,
     Decrement,
     CounterFetched(fetch::ResponseDataResult<Counter>),
+    ChangeWindow(Window),
     OnClose(web_sys::Event),
     BackendTerminated(fetch::ResponseDataResult<String>),
 }
@@ -72,6 +96,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             ));
             orders.skip();
         }
+
+        Msg::ChangeWindow(window) => model.window = window,
 
         Msg::OnClose(_event) => {
             log!("closing");
@@ -118,11 +144,39 @@ async fn increment_counter() -> Result<Msg, Msg> {
 }
 
 // ------ -----
-//     View
+//     Views
 // ------ -----
 
-fn view(model: &Model) -> impl View<Msg> {
+fn view(model: &Model) -> Node<Msg> {
     div![
+        div![
+            attrs! {At::Class => "nav"},
+            h5!["Local Seed + Gotham GUI", attrs! {At::Class => "nav-logo"}],
+            a![
+                "Counter",
+                attrs! {At::Href => "/counter", At::Class => "nav-item"}
+            ],
+            a![
+                "About",
+                attrs! {At::Href => "/about", At::Class => "nav-item"}
+            ],
+        ],
+        match model.window {
+            Window::Counter => view_counter(model),
+            Window::About => view_about(model),
+        },
+    ]
+}
+
+fn view_about(model: &Model) -> Vec<Node<Msg>> {
+    vec![div![
+        attrs! {At::Class => "row"},
+        p!["What this is about, e. g. display the readme :D"]
+    ]]
+}
+
+fn view_counter(model: &Model) -> Vec<Node<Msg>> {
+    vec![
         div![
             attrs! {At::Class => "row"},
             div![
@@ -157,5 +211,6 @@ pub fn render() {
     App::builder(update, view)
         .after_mount(after_mount)
         .window_events(window_events)
+        .routes(routes)
         .build_and_start();
 }
