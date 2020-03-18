@@ -11,6 +11,7 @@ const COUNTER_INIT_URL: &str = "http://localhost:8080/api/v1/counter/init";
 const COUNTER_INCREMENT_URL: &str = "http://localhost:8080/api/v1/counter/increment";
 const COUNTER_DECREMENT_URL: &str = "http://localhost:8080/api/v1/counter/decrement";
 const BACKEND_TERMINATION_URL: &str = "http://localhost:8080/api/v1/terminate";
+const README_FETCH_URL: &str = "http://localhost:8080/api/v1/assets/README.md";
 
 enum Window {
     Counter,
@@ -20,6 +21,7 @@ enum Window {
 struct Model {
     counter: Counter,
     window: Window,
+    readme: String,
 }
 
 impl Default for Model {
@@ -27,6 +29,7 @@ impl Default for Model {
         Self {
             counter: Counter::default(),
             window: Window::Counter,
+            readme: "".to_owned(),
         }
     }
 }
@@ -45,6 +48,7 @@ fn window_events(_model: &Model) -> Vec<EventHandler<Msg>> {
 
 fn after_mount(_: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
     orders.perform_cmd(init_counter());
+    orders.perform_cmd(fetch_readme());
     AfterMount::default()
 }
 
@@ -72,6 +76,7 @@ enum Msg {
     Increment,
     Decrement,
     CounterFetched(fetch::ResponseDataResult<Counter>),
+    ReadmeFetched(fetch::ResponseDataResult<String>),
     ChangeWindow(Window),
     OnClose(web_sys::Event),
     BackendTerminated(fetch::ResponseDataResult<String>),
@@ -92,6 +97,19 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::CounterFetched(Err(fail_reason)) => {
             error!(format!(
                 "Fetch error - Fetching counter failed - {:#?}",
+                fail_reason
+            ));
+            orders.skip();
+        }
+
+        Msg::ReadmeFetched(Ok(content)) => {
+            model.readme = content;
+            orders.skip(); // no need to redraw here, it's not displayed yet
+        }
+
+        Msg::ReadmeFetched(Err(fail_reason)) => {
+            error!(format!(
+                "Fetch error - Fetching readme failed - {:#?}",
                 fail_reason
             ));
             orders.skip();
@@ -143,6 +161,13 @@ async fn increment_counter() -> Result<Msg, Msg> {
     modify_counter(COUNTER_INCREMENT_URL).await
 }
 
+async fn fetch_readme() -> Result<Msg, Msg> {
+    Request::new(README_FETCH_URL)
+        .method(Method::Get)
+        .fetch_string_data(Msg::ReadmeFetched)
+        .await
+}
+
 // ------ -----
 //     Views
 // ------ -----
@@ -168,11 +193,8 @@ fn view(model: &Model) -> Node<Msg> {
     ]
 }
 
-fn view_about(_model: &Model) -> Vec<Node<Msg>> {
-    vec![div![
-        attrs! {At::Class => "row"},
-        p!["What this is about, e. g. display the readme :D"]
-    ]]
+fn view_about(model: &Model) -> Vec<Node<Msg>> {
+    vec![div![attrs! {At::Class => "row",}, md!(&model.readme),]]
 }
 
 fn view_counter(model: &Model) -> Vec<Node<Msg>> {

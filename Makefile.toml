@@ -37,6 +37,7 @@ cp gui/pkg/gui.js gui/assets/gui.js
 cp gui/pkg/gui_bg.wasm gui/assets/gui_bg.wasm
 cp gui/index.html gui/assets/index.html
 cp gui/wing.min.css gui/assets/wing.min.css
+cp README.md gui/assets/README.md
 '''
 ]
 
