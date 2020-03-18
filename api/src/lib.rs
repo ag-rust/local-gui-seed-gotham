@@ -15,7 +15,6 @@ use crate::api::{
     counter::{get_counter, post_counter_decrement, post_counter_increment, post_counter_init},
     terminate,
 };
-use gotham::handler::assets::FileOptions;
 use gotham::middleware::state::StateMiddleware;
 use gotham::pipeline::{single::single_pipeline, single_middleware};
 use gotham::router::builder::{build_router, DefineSingleRoute, DrawRoutes};

@@ -6,7 +6,7 @@ use seed::{prelude::*, *};
 
 use shared::Counter;
 
-const COUNTER_FETCH_URL: &str = "http://localhost:8080/api/v1/counter";
+const _COUNTER_FETCH_URL: &str = "http://localhost:8080/api/v1/counter";
 const COUNTER_INIT_URL: &str = "http://localhost:8080/api/v1/counter/init";
 const COUNTER_INCREMENT_URL: &str = "http://localhost:8080/api/v1/counter/increment";
 const COUNTER_DECREMENT_URL: &str = "http://localhost:8080/api/v1/counter/decrement";
@@ -115,8 +115,8 @@ async fn terminate_backend() -> Result<Msg, Msg> {
         .await
 }
 
-async fn fetch_counter() -> Result<Msg, Msg> {
-    Request::new(COUNTER_FETCH_URL)
+async fn _fetch_counter() -> Result<Msg, Msg> {
+    Request::new(_COUNTER_FETCH_URL)
         .fetch_json_data(Msg::CounterFetched)
         .await
 }
@@ -168,7 +168,7 @@ fn view(model: &Model) -> Node<Msg> {
     ]
 }
 
-fn view_about(model: &Model) -> Vec<Node<Msg>> {
+fn view_about(_model: &Model) -> Vec<Node<Msg>> {
     vec![div![
         attrs! {At::Class => "row"},
         p!["What this is about, e. g. display the readme :D"]
